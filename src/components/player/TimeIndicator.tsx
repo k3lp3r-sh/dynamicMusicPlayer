@@ -23,24 +23,24 @@ export default function TimeIndicator() {
   const hour = currentTime.getHours();
   const activeSlot = TIME_SLOTS.find((s) => hour >= s.start && hour < s.end);
 
-  const timeString = mounted 
+  const timeString = mounted
     ? currentTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     : "--:--";
 
   return (
-    <div className="flex items-center gap-3 glass rounded-full px-4 py-2">
+    <div className="flex items-center gap-2.5 glass rounded-xl px-3.5 py-2 border border-border-light/50">
       <div className="relative flex items-center gap-2">
-        <div className="w-2 h-2 rounded-full bg-success animate-glow-pulse" />
-        <span className="text-sm font-medium text-text-primary tabular-nums">
+        <div className="w-1.5 h-1.5 rounded-full bg-success animate-glow-pulse" />
+        <span className="text-xs font-medium text-text-primary tabular-nums tracking-wide">
           {timeString}
         </span>
       </div>
       {activeSlot && (
         <>
-          <div className="w-px h-4 bg-border-light" />
+          <div className="w-px h-3.5 bg-border-light/60" />
           <div className="flex items-center gap-1.5">
-            <span className="text-sm">{activeSlot.emoji}</span>
-            <span className="text-sm text-text-secondary font-medium">
+            <span className="text-xs">{activeSlot.emoji}</span>
+            <span className="text-[11px] text-text-muted font-medium tracking-wide">
               {activeSlot.name}
             </span>
           </div>

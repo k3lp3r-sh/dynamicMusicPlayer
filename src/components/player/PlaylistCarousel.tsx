@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback, MouseEvent as ReactMouseEvent } from "react";
 import PlaylistCard from "./PlaylistCard";
 
 interface Playlist {
@@ -22,86 +22,148 @@ export default function PlaylistCarousel({
   emoji,
   playlists,
 }: PlaylistCarouselProps) {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
-  const checkScroll = () => {
-    if (scrollContainerRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
-      // We add a tiny buffer (10px) to prevent sub-pixel rounding issues marking it as incomplete
-      setCanScrollLeft(scrollLeft > 5);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
-    }
-  };
+  // Drag state — isMouseDown tracks button press, isDragging only true after real movement
+  const [isDragging, setIsDragging] = useState(false);
+  const isMouseDown = useRef(false);
+  const dragStartX = useRef(0);
+  const dragScrollLeft = useRef(0);
+
+  const updateScroll = useCallback(() => {
+    if (!scrollRef.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+    const maxScroll = scrollWidth - clientWidth;
+    setCanScrollLeft(scrollLeft > 5);
+    setCanScrollRight(scrollLeft < maxScroll - 10);
+    setScrollProgress(maxScroll > 0 ? (scrollLeft / maxScroll) * 100 : 0);
+  }, []);
 
   useEffect(() => {
-    // Initial check and wait a tick for DOM to size correctly
-    const timer = setTimeout(checkScroll, 100);
-    window.addEventListener("resize", checkScroll);
+    const timer = setTimeout(updateScroll, 150);
+    window.addEventListener("resize", updateScroll);
     return () => {
       clearTimeout(timer);
-      window.removeEventListener("resize", checkScroll);
+      window.removeEventListener("resize", updateScroll);
     };
-  }, [playlists]);
+  }, [playlists, updateScroll]);
 
   const scroll = (direction: "left" | "right") => {
-    if (scrollContainerRef.current) {
-      const clientWidth = scrollContainerRef.current.clientWidth;
-      // Scroll by mostly full container width to snap elegantly
-      const scrollAmount = clientWidth * 0.85;
-      
-      scrollContainerRef.current.scrollBy({
-        left: direction === "left" ? -scrollAmount : scrollAmount,
-        behavior: "smooth",
-      });
+    if (!scrollRef.current) return;
+    const amount = scrollRef.current.clientWidth * 0.8;
+    scrollRef.current.scrollBy({
+      left: direction === "left" ? -amount : amount,
+      behavior: "smooth",
+    });
+  };
+
+  // ── Drag handlers ──
+  const handleMouseDown = (e: ReactMouseEvent) => {
+    if (!scrollRef.current) return;
+    isMouseDown.current = true;
+    dragStartX.current = e.pageX - scrollRef.current.offsetLeft;
+    dragScrollLeft.current = scrollRef.current.scrollLeft;
+  };
+
+  const handleMouseUp = () => {
+    isMouseDown.current = false;
+    setIsDragging(false);
+  };
+
+  const handleMouseLeave = () => {
+    isMouseDown.current = false;
+    setIsDragging(false);
+  };
+
+  const handleMouseMove = (e: ReactMouseEvent) => {
+    if (!isMouseDown.current || !scrollRef.current) return;
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const delta = x - dragStartX.current;
+    // Only activate drag mode after 5px of movement — allows clicks through
+    if (!isDragging && Math.abs(delta) > 5) {
+      setIsDragging(true);
+    }
+    if (Math.abs(delta) > 5) {
+      e.preventDefault();
+      scrollRef.current.scrollLeft = dragScrollLeft.current - delta * 1.4;
     }
   };
 
   if (!playlists || playlists.length === 0) return null;
 
+  const activeCount = playlists.filter(p => p.isActive).length;
+
   return (
-    <div className="mb-16 category-row relative">
-      <div className="flex items-center justify-between mb-6 px-4 sm:px-8">
-        <h2 className="text-3xl font-display font-medium tracking-tight text-white flex items-center gap-3">
-          {emoji && <span className="text-3xl">{emoji}</span>}
-          {category}
-        </h2>
-        
-        {/* Navigation Arrows */}
-        <div className="hidden sm:flex items-center gap-3">
+    <div className="mb-12 sm:mb-16 category-row relative">
+      {/* ── Category Header ── */}
+      <div className="flex items-center justify-between mb-5 px-4 sm:px-8">
+        <div className="flex items-center gap-4">
+          <h2 className="text-2xl sm:text-3xl font-display font-semibold tracking-tight text-white flex items-center gap-3">
+            {emoji && <span className="text-2xl sm:text-3xl">{emoji}</span>}
+            {category}
+          </h2>
+          {activeCount > 0 && (
+            <span className="category-pill live-badge">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+              {activeCount} live
+            </span>
+          )}
+        </div>
+
+        {/* Navigation */}
+        <div className="hidden sm:flex items-center gap-2">
           <button
             onClick={() => scroll("left")}
             disabled={!canScrollLeft}
-            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 border ${
-              canScrollLeft 
-                ? "bg-surface-elevated/50 hover:bg-primary border-border-light hover:border-primary text-text-primary hover:shadow-[0_0_15px_rgba(124,58,237,0.5)] transform hover:scale-110 active:scale-95" 
-                : "bg-surface/30 border-transparent text-text-muted/30 cursor-not-allowed"
+            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 border text-sm ${
+              canScrollLeft
+                ? "bg-surface-elevated/60 hover:bg-primary/90 border-border-light hover:border-primary text-text-primary hover:text-white hover:shadow-[0_0_20px_rgba(124,58,237,0.4)] hover:scale-105 active:scale-95"
+                : "bg-surface/20 border-transparent text-text-muted/20 cursor-not-allowed"
             }`}
             aria-label="Scroll left"
           >
-            ←
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
           </button>
           <button
             onClick={() => scroll("right")}
             disabled={!canScrollRight}
-            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 border ${
-              canScrollRight 
-                ? "bg-surface-elevated/50 hover:bg-primary border-border-light hover:border-primary text-text-primary hover:shadow-[0_0_15px_rgba(124,58,237,0.5)] transform hover:scale-110 active:scale-95" 
-                : "bg-surface/30 border-transparent text-text-muted/30 cursor-not-allowed"
+            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 border text-sm ${
+              canScrollRight
+                ? "bg-surface-elevated/60 hover:bg-primary/90 border-border-light hover:border-primary text-text-primary hover:text-white hover:shadow-[0_0_20px_rgba(124,58,237,0.4)] hover:scale-105 active:scale-95"
+                : "bg-surface/20 border-transparent text-text-muted/20 cursor-not-allowed"
             }`}
             aria-label="Scroll right"
           >
-            →
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
           </button>
         </div>
       </div>
 
+      {/* ── Scroll Progress Track ── */}
+      <div className="px-4 sm:px-8 mb-4">
+        <div className="scroll-progress-track">
+          <div
+            className="scroll-progress-fill"
+            style={{ width: `${Math.max(scrollProgress, 2)}%` }}
+          />
+        </div>
+      </div>
+
+      {/* ── Cards Container ── */}
       <div className="relative group">
         <div
-          ref={scrollContainerRef}
-          onScroll={checkScroll}
-          className="flex gap-5 sm:gap-8 overflow-x-auto px-4 sm:px-8 pb-10 pt-4 carousel-scroll mask-edges"
+          ref={scrollRef}
+          onScroll={updateScroll}
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseLeave}
+          onMouseMove={handleMouseMove}
+          className={`flex gap-4 sm:gap-6 overflow-x-auto px-4 sm:px-8 pb-8 pt-3 carousel-scroll mask-edges select-none ${
+            isDragging ? "is-dragging" : "cursor-grab active:cursor-grabbing"
+          }`}
         >
           {playlists.map((pl) => (
             <div key={pl.id} className="carousel-item">
@@ -114,8 +176,7 @@ export default function PlaylistCarousel({
               />
             </div>
           ))}
-          {/* Spacer block at the end so last item doesn't stick to edge */}
-          <div className="w-[10vw] shrink-0 pointer-events-none"></div>
+          <div className="w-[8vw] shrink-0 pointer-events-none" />
         </div>
       </div>
     </div>
