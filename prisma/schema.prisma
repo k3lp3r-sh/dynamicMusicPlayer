@@ -1,9 +1,10 @@
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
-  provider = "turso"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
   authToken = env("DATABASE_AUTH_TOKEN")
 }
