@@ -2,8 +2,12 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaLibSql } from "@prisma/adapter-libsql";
 import path from "path";
 
-const url = process.env.TURSO_DATABASE_URL || `file:${path.join(process.cwd(), "dev.db")}`;
-const authToken = process.env.TURSO_AUTH_TOKEN;
+const url =
+  process.env.DATABASE_URL ||
+  process.env.TURSO_DATABASE_URL ||
+  `file:${path.join(process.cwd(), "dev.db")}`;
+const authToken =
+  process.env.DATABASE_AUTH_TOKEN || process.env.TURSO_AUTH_TOKEN;
 
 const adapter = new PrismaLibSql({ url, authToken });
 const prisma = new PrismaClient({ adapter });

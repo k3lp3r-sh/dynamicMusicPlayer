@@ -5,16 +5,27 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
+function isRemoteLibsqlUrl(url: string) {
+  return url.startsWith("libsql://") || url.startsWith("https://");
+}
+
 function getDatabaseConfig() {
   const url =
     process.env.DATABASE_URL ||
     process.env.TURSO_DATABASE_URL ||
     (process.env.NODE_ENV === "production" ? undefined : "file:./dev.db");
-  const authToken = process.env.DATABASE_AUTH_TOKEN;
+  const authToken =
+    process.env.DATABASE_AUTH_TOKEN || process.env.TURSO_AUTH_TOKEN;
 
   if (!url) {
     throw new Error(
       "Missing DATABASE_URL (or TURSO_DATABASE_URL) in production. Add it in your Vercel project settings before deploying."
+    );
+  }
+
+  if (isRemoteLibsqlUrl(url) && !authToken) {
+    throw new Error(
+      "Missing DATABASE_AUTH_TOKEN (or TURSO_AUTH_TOKEN) for the remote libsql/Turso database."
     );
   }
 
