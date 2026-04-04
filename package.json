@@ -5,6 +5,8 @@
   "scripts": {
     "postinstall": "prisma generate",
     "db:sync-remote": "node prisma/sync-remote.mjs",
+    "playlist:audit": "node scripts/audit-spotify-playlists.mjs",
+    "playlist:repair": "node scripts/repair-broken-playlists.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

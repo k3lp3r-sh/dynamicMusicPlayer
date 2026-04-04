@@ -4,7 +4,6 @@ import { useState, useRef, MouseEvent } from "react";
 import SpotifyEmbed from "./SpotifyEmbed";
 
 interface PlaylistCardProps {
-  id: string;
   spotifyId: string;
   name: string;
   description: string;
@@ -12,7 +11,6 @@ interface PlaylistCardProps {
 }
 
 export default function PlaylistCard({
-  id,
   spotifyId,
   name,
   description,
@@ -94,7 +92,7 @@ export default function PlaylistCard({
         <div className="grid-transition-content">
           <div className="px-5 pb-5 pt-1 relative z-0">
             <div className="w-full h-px bg-gradient-to-r from-transparent via-primary/15 to-transparent mb-4" />
-            <SpotifyEmbed spotifyId={spotifyId} />
+            <SpotifyEmbed spotifyId={spotifyId} playlistName={name} />
           </div>
         </div>
       </div>

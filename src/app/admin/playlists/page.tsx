@@ -3,8 +3,16 @@
 import { useState, useEffect } from "react";
 import SpotifyEmbed from "@/components/player/SpotifyEmbed";
 
+type PlaylistSummary = {
+  id: string;
+  spotifyId: string;
+  name: string;
+  description: string;
+  category: string;
+};
+
 export default function PlaylistsAdmin() {
-  const [playlists, setPlaylists] = useState<any[]>([]);
+  const [playlists, setPlaylists] = useState<PlaylistSummary[]>([]);
   const [loading, setLoading] = useState(true);
   
   // Form State
@@ -32,12 +40,10 @@ export default function PlaylistsAdmin() {
   };
 
   const extractSpotifyId = (url: string) => {
-    // Handle full URL "https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M?si=..."
-    // Handle URI "spotify:playlist:37i9dQZF1DXcBWIGoYBM5M"
-    // Handle raw ID "37i9dQZF1DXcBWIGoYBM5M"
-    const match = url.match(/playlist[\/:]?([a-zA-Z0-9]+)/);
+    const trimmed = url.trim();
+    const match = trimmed.match(/(?:playlist[/:])([a-zA-Z0-9]{22})/);
     if (match) return match[1];
-    if (url.length === 22 && !url.includes("/")) return url;
+    if (/^[a-zA-Z0-9]{22}$/.test(trimmed)) return trimmed;
     return "";
   };
 
@@ -53,11 +59,16 @@ export default function PlaylistsAdmin() {
     }
 
     try {
-      await fetch("/api/playlists", {
+      const response = await fetch("/api/playlists", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ spotifyId, name, description, category }),
       });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        throw new Error(payload?.error || "Failed to save playlist");
+      }
       
       setIsAdding(false);
       setSpotifyUrl("");
@@ -66,7 +77,7 @@ export default function PlaylistsAdmin() {
       await fetchPlaylists();
     } catch (e) {
       console.error(e);
-      alert("Failed to save playlist");
+      alert(e instanceof Error ? e.message : "Failed to save playlist");
     } finally {
       setSaving(false);
     }

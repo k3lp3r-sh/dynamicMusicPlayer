@@ -168,7 +168,6 @@ export default function PlaylistCarousel({
           {playlists.map((pl) => (
             <div key={pl.id} className="carousel-item">
               <PlaylistCard
-                id={pl.id}
                 spotifyId={pl.spotifyId}
                 name={pl.name}
                 description={pl.description}

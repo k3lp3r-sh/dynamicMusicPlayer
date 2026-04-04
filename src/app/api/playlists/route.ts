@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import {
+  normalizeSpotifyPlaylistId,
+  SpotifyPlaylistValidationError,
+  validateSpotifyPlaylistId,
+} from "@/lib/spotify";
 
 export async function GET() {
   try {
@@ -25,9 +30,12 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
+    const spotifyId = normalizeSpotifyPlaylistId(data.spotifyId);
+    await validateSpotifyPlaylistId(spotifyId);
+
     const playlist = await prisma.playlist.create({
       data: {
-        spotifyId: data.spotifyId,
+        spotifyId,
         name: data.name,
         description: data.description || "",
         category: data.category || "Uncategorized",
@@ -36,6 +44,13 @@ export async function POST(request: Request) {
 
     return NextResponse.json(playlist);
   } catch (error) {
+    if (error instanceof SpotifyPlaylistValidationError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.status }
+      );
+    }
+
     console.error("Error creating playlist:", error);
     return NextResponse.json(
       { error: "Failed to create playlist" },

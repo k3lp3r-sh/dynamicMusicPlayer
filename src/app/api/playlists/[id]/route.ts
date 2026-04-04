@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import {
+  normalizeSpotifyPlaylistId,
+  SpotifyPlaylistValidationError,
+  validateSpotifyPlaylistId,
+} from "@/lib/spotify";
 
 export async function PUT(
   request: Request,
@@ -8,10 +13,13 @@ export async function PUT(
   try {
     const { id } = await params;
     const data = await request.json();
+    const spotifyId = normalizeSpotifyPlaylistId(data.spotifyId);
+    await validateSpotifyPlaylistId(spotifyId);
+
     const playlist = await prisma.playlist.update({
       where: { id },
       data: {
-        spotifyId: data.spotifyId,
+        spotifyId,
         name: data.name,
         description: data.description,
         category: data.category,
@@ -20,6 +28,13 @@ export async function PUT(
 
     return NextResponse.json(playlist);
   } catch (error) {
+    if (error instanceof SpotifyPlaylistValidationError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.status }
+      );
+    }
+
     console.error("Error updating playlist:", error);
     return NextResponse.json(
       { error: "Failed to update playlist" },
