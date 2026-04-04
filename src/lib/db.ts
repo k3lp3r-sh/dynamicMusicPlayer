@@ -1,16 +1,29 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaLibSql } from "@prisma/adapter-libsql";
-import { createClient } from "@libsql/client";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-function createPrismaClient() {
-  const url = process.env.DATABASE_URL || "file:./dev.db";
+function getDatabaseConfig() {
+  const url =
+    process.env.DATABASE_URL ||
+    process.env.TURSO_DATABASE_URL ||
+    (process.env.NODE_ENV === "production" ? undefined : "file:./dev.db");
   const authToken = process.env.DATABASE_AUTH_TOKEN;
 
-  const libsql = createClient({ url, authToken });
+  if (!url) {
+    throw new Error(
+      "Missing DATABASE_URL (or TURSO_DATABASE_URL) in production. Add it in your Vercel project settings before deploying."
+    );
+  }
+
+  return { url, authToken };
+}
+
+function createPrismaClient() {
+  const { url, authToken } = getDatabaseConfig();
+
   const adapter = new PrismaLibSql({ url, authToken });
 
   return new PrismaClient({ adapter });
