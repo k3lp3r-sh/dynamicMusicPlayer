@@ -1,13 +1,23 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaLibSql } from "@prisma/adapter-libsql";
-import path from "path";
 
 const url =
   process.env.DATABASE_URL ||
-  process.env.TURSO_DATABASE_URL ||
-  `file:${path.join(process.cwd(), "dev.db")}`;
+  process.env.TURSO_DATABASE_URL;
 const authToken =
   process.env.DATABASE_AUTH_TOKEN || process.env.TURSO_AUTH_TOKEN;
+
+if (!url) {
+  throw new Error(
+    "Missing DATABASE_URL (or TURSO_DATABASE_URL). This seed script targets the remote Turso database only."
+  );
+}
+
+if (!authToken) {
+  throw new Error(
+    "Missing DATABASE_AUTH_TOKEN (or TURSO_AUTH_TOKEN) for the remote Turso database."
+  );
+}
 
 const adapter = new PrismaLibSql({ url, authToken });
 const prisma = new PrismaClient({ adapter });

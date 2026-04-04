@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "postinstall": "prisma generate",
+    "db:sync-remote": "node prisma/sync-remote.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
