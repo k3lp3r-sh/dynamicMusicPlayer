@@ -6,8 +6,8 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 function createPrismaClient() {
-  const url = process.env.TURSO_DATABASE_URL || "file:./dev.db";
-  const authToken = process.env.TURSO_AUTH_TOKEN;
+  const url = process.env.DATABASE_URL || "file:./dev.db";
+  const authToken = process.env.DATABASE_AUTH_TOKEN;
 
   const adapter = new PrismaLibSql({ url, authToken });
   return new PrismaClient({ adapter });

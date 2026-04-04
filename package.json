@@ -15,7 +15,6 @@
   "dependencies": {
     "@libsql/client": "^0.17.2",
     "@prisma/adapter-better-sqlite3": "^7.6.0",
-    "@prisma/adapter-libsql": "^7.6.0",
     "@prisma/client": "^7.6.0",
     "@types/better-sqlite3": "^7.6.13",
     "better-sqlite3": "^12.8.0",
@@ -25,6 +24,7 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@prisma/adapter-libsql": "^7.6.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
