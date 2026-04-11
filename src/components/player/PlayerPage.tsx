@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Logo from "./Logo";
 import TimeIndicator from "./TimeIndicator";
 import PlaylistCarousel from "./PlaylistCarousel";
+import ThemeToggle from "./ThemeToggle";
 import { Playlist, Schedule } from "@prisma/client";
 
 type PlaylistWithSchedule = Playlist & { schedules?: Schedule[] };
@@ -14,11 +15,11 @@ interface PlayerPageProps {
   siteTagline: string;
 }
 
-const CATEGORY_EMOJIS: Record<string, string> = {
-  "Morning Chill": "🌅",
-  "Afternoon Energy": "⚡",
-  "Evening Lounge": "🌆",
-  "Late Night": "🌙",
+const CATEGORY_COVERS: Record<string, string> = {
+  "Morning Chill": "/covers/morning-chill.png",
+  "Afternoon Energy": "/covers/afternoon-energy.png",
+  "Evening Lounge": "/covers/evening-lounge.png",
+  "Late Night": "/covers/late-night.png",
 };
 
 export default function PlayerPage({
@@ -27,22 +28,13 @@ export default function PlayerPage({
   siteTagline,
 }: PlayerPageProps) {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
-  const [phase, setPhase] = useState<"splash" | "revealing" | "ready">("splash");
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setCurrentTime(new Date());
+    setMounted(true);
     const interval = setInterval(() => setCurrentTime(new Date()), 60000);
-
-    // Phase 1: Splash shows for 1.8s
-    const t1 = setTimeout(() => setPhase("revealing"), 1800);
-    // Phase 2: Fade-out takes 1s, then remove completely
-    const t2 = setTimeout(() => setPhase("ready"), 2800);
-
-    return () => {
-      clearInterval(interval);
-      clearTimeout(t1);
-      clearTimeout(t2);
-    };
+    return () => clearInterval(interval);
   }, []);
 
   // Active playlist logic
@@ -75,114 +67,78 @@ export default function PlayerPage({
     return a.localeCompare(b);
   });
 
-  const isContentVisible = phase === "revealing" || phase === "ready";
-
   return (
-    <div className="min-h-screen pb-24 font-body relative bg-background overflow-hidden bg-noise">
-      {/* ── Splash Reveal ── */}
-      {phase !== "ready" && (
-        <div className={`fixed inset-0 z-[100] bg-background flex flex-col items-center justify-center ${phase === "revealing" ? "animate-splash-fade-out" : ""}`}>
-          {/* Animated concentric rings */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="absolute w-32 h-32 rounded-full border border-primary/20 animate-splash-ring" style={{ animationDelay: "0s" }} />
-            <div className="absolute w-32 h-32 rounded-full border border-primary/15 animate-splash-ring" style={{ animationDelay: "0.8s" }} />
-            <div className="absolute w-32 h-32 rounded-full border border-primary/10 animate-splash-ring" style={{ animationDelay: "1.6s" }} />
-          </div>
-
-          {/* Logo */}
-          <div className="animate-splash-breathe scale-[2.5] sm:scale-[3.5] mb-16 relative z-10">
-            <Logo />
-          </div>
-
-          {/* Decorative line */}
-          <div className="h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent animate-splash-line mb-6" style={{ width: 0 }} />
-
-          {/* Title */}
-          <h1 className="text-lg sm:text-xl font-display font-light text-white tracking-[0.4em] uppercase animate-splash-text-in">
-            {siteTitle}
-          </h1>
-        </div>
-      )}
-
-      {/* ── Floating Orbs (always visible, create depth) ── */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="orb orb-primary w-[600px] h-[600px] top-[-15%] left-[-5%] animate-float" style={{ animationDelay: "0s" }} />
-        <div className="orb orb-accent w-[400px] h-[400px] bottom-[10%] right-[-8%] animate-float" style={{ animationDelay: "2s", animationDuration: "10s" }} />
-        <div className="orb orb-warm w-[350px] h-[350px] top-[40%] left-[60%] animate-float" style={{ animationDelay: "4s", animationDuration: "12s" }} />
-        <div className="absolute inset-0 bg-grid opacity-[0.15]" />
-      </div>
-
+    <div className="min-h-screen pb-20 font-body relative">
       {/* ── Header ── */}
-      <header className={`sticky top-0 z-50 glass-strong shadow-2xl px-4 sm:px-8 py-3 transition-all duration-700 ${isContentVisible ? "animate-fade-up" : "opacity-0"}`}>
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
-          <div className="flex items-center gap-4">
-            <div className="relative group">
-              <div className="absolute -inset-2 bg-primary/20 rounded-xl blur-xl group-hover:bg-primary/35 transition-all duration-700 opacity-0 group-hover:opacity-100" />
-              <Logo />
-            </div>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-display font-bold text-white tracking-[0.15em] uppercase leading-tight">
-                {siteTitle}
-              </h1>
-              <p className="text-[10px] sm:text-xs text-text-muted uppercase tracking-[0.25em] font-medium">
-                {siteTagline}
-              </p>
-            </div>
+      <header className={`sticky top-0 z-50 bg-accent text-white backdrop-blur-sm shadow-sm px-6 sm:px-10 lg:px-16 py-4 transition-opacity duration-500 ${mounted ? "opacity-100" : "opacity-0"}`}>
+        <div className="max-w-screen-2xl mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-6">
+            <Logo />
+            <div className="hidden sm:block w-px h-4 bg-white/20" />
+            <p className="hidden sm:block text-[11px] text-white/80 tracking-[0.1em] uppercase">
+              {siteTagline}
+            </p>
           </div>
-          <TimeIndicator />
+          <div className="flex items-center gap-5">
+            <TimeIndicator />
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 
-      {/* ── Main Content ── */}
-      <main className={`max-w-screen-2xl mx-auto pt-12 sm:pt-16 relative z-10 transition-all duration-700 ${isContentVisible ? "animate-fade-in" : "opacity-0"}`}>
-        {/* Hero Section */}
-        <div className="px-4 sm:px-8 max-w-7xl mx-auto mb-10 sm:mb-14">
-          {currentTime && (
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-              <p className="text-primary font-display uppercase tracking-[0.2em] text-xs font-semibold">
-                {activeCategory ? "Now Playing" : "Current Selections"}
-              </p>
+      {/* ── Hero ── */}
+      <section className={`max-w-screen-2xl mx-auto px-6 sm:px-10 lg:px-16 pt-16 sm:pt-24 pb-16 sm:pb-20 transition-all duration-700 ${mounted ? "animate-fade-up" : "opacity-0"}`}>
+        <div className="max-w-2xl">
+          {currentTime && activeCategory && (
+            <div className="flex items-center gap-2 mb-6">
+              <div className="w-1.5 h-1.5 rounded-full bg-accent live-dot" />
+              <span className="text-[11px] font-medium text-accent uppercase tracking-[0.15em]">
+                Now Playing · {activeCategory}
+              </span>
             </div>
           )}
-          <h2 className="text-5xl sm:text-7xl lg:text-8xl font-display font-bold text-white tracking-tight leading-[0.9] mb-4">
-            Curated
-          </h2>
-          <h2 className="text-5xl sm:text-7xl lg:text-8xl font-display font-bold tracking-tight leading-[0.9]">
-            <span className="gradient-text italic">Experiences</span>
-          </h2>
-
-          <p className="mt-6 text-text-secondary text-sm sm:text-base max-w-lg leading-relaxed">
-            Premium sound curation that transforms your space. Each playlist is hand-picked to match the perfectly right moment.
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-semibold tracking-tight leading-[1.05] text-text-primary mb-6">
+            A premium auditory experience<br />
+            <span className="text-text-muted font-light">for your space</span>
+          </h1>
+          <p className="text-sm sm:text-base text-text-secondary leading-relaxed max-w-md">
+            Hand-picked playlists that transform your environment. 
+            Each selection is crafted for the perfect moment.
           </p>
         </div>
+      </section>
 
-        {/* Playlist Categories */}
-        {isContentVisible && currentTime ? (
-          <div className="relative z-20">
-            {categories.map((category) => (
-              <PlaylistCarousel
-                key={category}
-                category={category}
-                emoji={CATEGORY_EMOJIS[category] || ""}
-                playlists={groupedPlaylists[category]}
-              />
-            ))}
-          </div>
+      {/* ── Divider ── */}
+      <div className="max-w-screen-2xl mx-auto px-6 sm:px-10 lg:px-16 mb-16 sm:mb-20">
+        <div className="h-px bg-border" />
+      </div>
+
+      {/* ── Playlist Categories ── */}
+      <main className={`relative z-10 transition-all duration-700 ${mounted ? "animate-fade-in" : "opacity-0"}`}>
+        {mounted && currentTime ? (
+          categories.map((category) => (
+            <PlaylistCarousel
+              key={category}
+              category={category}
+              playlists={groupedPlaylists[category]}
+              coverImage={CATEGORY_COVERS[category] || "/covers/morning-chill.png"}
+              isActiveCategory={category === activeCategory}
+            />
+          ))
         ) : (
           <div className="flex justify-center py-32">
-            <div className="w-12 h-12 border-2 border-primary/15 border-t-primary rounded-full animate-spin" />
+            <div className="w-8 h-8 border border-border border-t-accent rounded-full animate-spin" />
           </div>
         )}
       </main>
 
       {/* ── Footer ── */}
-      <footer className={`relative z-10 mt-12 border-t border-border px-4 sm:px-8 py-8 transition-all duration-700 ${isContentVisible ? "animate-fade-in" : "opacity-0"}`} style={{ animationDelay: "0.5s" }}>
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-text-muted text-xs tracking-wider uppercase">
+      <footer className={`relative z-10 border-t border-border px-6 sm:px-10 lg:px-16 py-8 mt-8 transition-opacity duration-500 ${mounted ? "opacity-100" : "opacity-0"}`}>
+        <div className="max-w-screen-2xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+          <p className="text-text-muted text-[11px] tracking-[0.1em] uppercase">
             &copy; {new Date().getFullYear()} {siteTitle}
           </p>
-          <p className="text-text-muted/50 text-[10px] tracking-wider uppercase">
+          <p className="text-text-muted/40 text-[10px] tracking-[0.1em] uppercase">
             Powered by Spotify
           </p>
         </div>

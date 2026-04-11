@@ -5,7 +5,6 @@ import { useState } from "react";
 interface SpotifyEmbedProps {
   spotifyId: string;
   playlistName?: string;
-  compact?: boolean;
 }
 
 export default function SpotifyEmbed({
@@ -14,15 +13,15 @@ export default function SpotifyEmbed({
 }: SpotifyEmbedProps) {
   const [loaded, setLoaded] = useState(false);
 
-  const height = 352; // Always show the full playlist tracklist
+  const height = 352;
   const playlistUrl = `https://open.spotify.com/playlist/${spotifyId}`;
 
   return (
     <div className="space-y-3">
-      <div className="relative w-full overflow-hidden rounded-lg">
+      <div className="relative w-full overflow-hidden rounded">
         {!loaded && (
           <div
-            className="absolute inset-0 animate-shimmer rounded-lg"
+            className="absolute inset-0 animate-shimmer rounded"
             style={{ height }}
           />
         )}
@@ -34,7 +33,7 @@ export default function SpotifyEmbed({
           frameBorder="0"
           allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
           loading="lazy"
-          className={`rounded-lg transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0"}`}
+          className={`rounded transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0"}`}
           onLoad={() => setLoaded(true)}
         />
       </div>
@@ -43,9 +42,9 @@ export default function SpotifyEmbed({
         href={playlistUrl}
         target="_blank"
         rel="noreferrer"
-        className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-primary-light hover:text-white transition-colors"
+        className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.1em] text-text-muted hover:text-accent transition-colors"
       >
-        Open In Spotify
+        Open in Spotify
         <span aria-hidden="true">↗</span>
       </a>
     </div>

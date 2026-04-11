@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react";
 
 const TIME_SLOTS = [
-  { name: "Morning Chill", emoji: "🌅", start: 6, end: 11 },
-  { name: "Afternoon Energy", emoji: "⚡", start: 11, end: 16 },
-  { name: "Evening Lounge", emoji: "🌆", start: 16, end: 21 },
-  { name: "Late Night", emoji: "🌙", start: 21, end: 24 },
-  { name: "Late Night", emoji: "🌙", start: 0, end: 6 },
+  { name: "Morning Chill", start: 6, end: 11 },
+  { name: "Afternoon Energy", start: 11, end: 16 },
+  { name: "Evening Lounge", start: 16, end: 21 },
+  { name: "Late Night", start: 21, end: 24 },
+  { name: "Late Night", start: 0, end: 6 },
 ];
 
 export default function TimeIndicator() {
@@ -28,22 +28,19 @@ export default function TimeIndicator() {
     : "--:--";
 
   return (
-    <div className="flex items-center gap-2.5 glass rounded-xl px-3.5 py-2 border border-border-light/50">
-      <div className="relative flex items-center gap-2">
-        <div className="w-1.5 h-1.5 rounded-full bg-success animate-glow-pulse" />
-        <span className="text-xs font-medium text-text-primary tabular-nums tracking-wide">
+    <div className="flex items-center gap-3 text-white/90">
+      <div className="flex items-center gap-2">
+        <div className="w-1.5 h-1.5 rounded-full bg-white live-dot" />
+        <span className="text-xs font-body tabular-nums">
           {timeString}
         </span>
       </div>
       {activeSlot && (
         <>
-          <div className="w-px h-3.5 bg-border-light/60" />
-          <div className="flex items-center gap-1.5">
-            <span className="text-xs">{activeSlot.emoji}</span>
-            <span className="text-[11px] text-text-muted font-medium tracking-wide">
-              {activeSlot.name}
-            </span>
-          </div>
+          <span className="text-white/60">·</span>
+          <span className="text-xs text-white/80 font-body">
+            {activeSlot.name}
+          </span>
         </>
       )}
     </div>

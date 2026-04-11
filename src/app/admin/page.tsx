@@ -11,34 +11,34 @@ export default async function AdminDashboard() {
 
   return (
     <div>
-      <h1 className="text-3xl font-display font-bold mb-8">Dashboard Overview</h1>
+      <h1 className="text-2xl font-display font-semibold tracking-tight mb-8">Dashboard</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        <div className="glass-strong p-6 rounded-xl border border-border">
-          <h3 className="text-text-secondary font-medium mb-2">Total Playlists</h3>
-          <p className="text-4xl font-display font-bold text-primary-light">{playlistCount}</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+        <div className="p-6 rounded border border-border bg-surface">
+          <p className="text-xs text-text-muted uppercase tracking-[0.1em] mb-2">Playlists</p>
+          <p className="text-3xl font-display font-semibold text-text-primary">{playlistCount}</p>
         </div>
         
-        <div className="glass-strong p-6 rounded-xl border border-border">
-          <h3 className="text-text-secondary font-medium mb-2">Active Schedules</h3>
-          <p className="text-4xl font-display font-bold text-accent-glow">{scheduleCount}</p>
+        <div className="p-6 rounded border border-border bg-surface">
+          <p className="text-xs text-text-muted uppercase tracking-[0.1em] mb-2">Schedules</p>
+          <p className="text-3xl font-display font-semibold text-text-primary">{scheduleCount}</p>
         </div>
       </div>
 
-      <div className="glass p-8 rounded-xl border border-border">
-        <h2 className="text-xl font-display font-bold mb-4">Quick Actions</h2>
-        <div className="flex gap-4">
+      <div className="p-6 rounded border border-border bg-surface">
+        <h2 className="text-lg font-display font-medium tracking-tight mb-4">Quick Actions</h2>
+        <div className="flex gap-3">
           <Link
             href="/admin/playlists"
-            className="px-4 py-2 bg-primary hover:bg-primary-glow text-white rounded-lg font-medium transition-all hover:scale-105"
+            className="px-4 py-2 bg-accent text-black text-sm font-medium rounded transition-colors hover:opacity-90"
           >
-            + Add New Playlist
+            + Add Playlist
           </Link>
           <Link
             href="/"
-            className="px-4 py-2 bg-surface-elevated hover:bg-surface-hover text-white rounded-lg font-medium transition-all"
+            className="px-4 py-2 bg-surface-elevated border border-border text-text-primary text-sm font-medium rounded transition-colors hover:bg-surface-hover"
           >
-            View Live Player
+            View Player
           </Link>
         </div>
       </div>

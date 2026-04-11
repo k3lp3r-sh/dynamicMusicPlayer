@@ -9,54 +9,54 @@ export default function AdminLayout({
   return (
     <div className="flex h-screen bg-background text-text-primary">
       {/* Sidebar */}
-      <aside className="w-64 bg-surface border-r border-border-light flex flex-col">
-        <div className="p-6 border-b border-border-light">
+      <aside className="w-60 bg-surface border-r border-border flex flex-col">
+        <div className="p-6 border-b border-border">
           <Logo />
-          <p className="mt-2 text-xs text-text-muted font-medium uppercase tracking-wider">
-            Admin Dashboard
+          <p className="mt-2 text-[10px] text-text-muted font-medium uppercase tracking-[0.15em]">
+            Admin
           </p>
         </div>
         
-        <nav className="flex-1 p-4 space-y-2">
+        <nav className="flex-1 p-3 space-y-1">
           <Link
             href="/admin"
-            className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-elevated text-text-secondary hover:text-white transition-colors"
+            className="flex items-center gap-3 px-3 py-2.5 rounded text-sm text-text-secondary hover:text-text-primary hover:bg-surface-elevated transition-colors"
           >
-            📊 Overview
+            Overview
           </Link>
           <Link
             href="/admin/playlists"
-            className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-elevated text-text-secondary hover:text-white transition-colors"
+            className="flex items-center gap-3 px-3 py-2.5 rounded text-sm text-text-secondary hover:text-text-primary hover:bg-surface-elevated transition-colors"
           >
-            🎧 Playlists
+            Playlists
           </Link>
           <Link
             href="/admin/schedules"
-            className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-elevated text-text-secondary hover:text-white transition-colors"
+            className="flex items-center gap-3 px-3 py-2.5 rounded text-sm text-text-secondary hover:text-text-primary hover:bg-surface-elevated transition-colors"
           >
-            📅 Schedules
+            Schedules
           </Link>
           <Link
             href="/admin/settings"
-            className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-elevated text-text-secondary hover:text-white transition-colors"
+            className="flex items-center gap-3 px-3 py-2.5 rounded text-sm text-text-secondary hover:text-text-primary hover:bg-surface-elevated transition-colors"
           >
-            ⚙️ Settings
+            Settings
           </Link>
         </nav>
         
-        <div className="p-4 border-t border-border-light">
+        <div className="p-3 border-t border-border">
           <Link
             href="/"
-            className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-elevated text-primary text-sm font-medium transition-colors"
+            className="flex items-center gap-2 px-3 py-2.5 rounded text-sm text-accent hover:bg-accent-dim transition-colors"
           >
-            ← Back to Player
+            ← Player
           </Link>
         </div>
       </aside>
 
-      {/* Main Content */}
+      {/* Main */}
       <main className="flex-1 overflow-auto">
-        <div className="p-8 max-w-6xl mx-auto">
+        <div className="p-8 max-w-5xl mx-auto">
           {children}
         </div>
       </main>

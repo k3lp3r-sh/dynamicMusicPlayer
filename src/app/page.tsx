@@ -23,7 +23,7 @@ export default async function Home() {
   }, {} as Record<string, string>);
 
   const siteTitle = settings["siteTitle"] || "Truffles";
-  const siteTagline = settings["siteTagline"] || "Curated sounds for your space";
+  const siteTagline = settings["siteTagline"] || "A premium auditory experience for your space";
 
   return (
     <PlayerPage

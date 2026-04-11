@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
-import { Outfit, Inter } from "next/font/google";
+import { Space_Grotesk, Inter } from "next/font/google";
+import { ThemeProvider } from "@/components/player/ThemeProvider";
+import Script from "next/script";
 import "./globals.css";
 
-const outfit = Outfit({
+const spaceGrotesk = Space_Grotesk({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 const inter = Inter({
@@ -15,7 +17,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Truffles — Curated Sounds for Your Space",
+  title: "Truffles — A Premium Auditory Experience",
   description:
     "Premium music curation for commercial spaces. Spotify playlists for restaurants, lounges, and retail.",
 };
@@ -26,9 +28,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${outfit.variable} ${inter.variable}`} suppressHydrationWarning>
-      <body className="min-h-screen bg-background text-text-primary antialiased" suppressHydrationWarning>
-        {children}
+    <html lang="en" className={`${spaceGrotesk.variable} ${inter.variable}`} suppressHydrationWarning>
+      <head>
+        <Script
+          id="theme-script"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+             __html: `
+              try {
+                let theme = localStorage.getItem('truffles-theme');
+                if (!theme) { theme = 'dark'; }
+                document.documentElement.setAttribute('data-theme', theme);
+              } catch (e) {}
+            `,
+          }}
+        />
+      </head>
+      <body className="min-h-screen antialiased" suppressHydrationWarning>
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
