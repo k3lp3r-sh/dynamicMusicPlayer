@@ -16,6 +16,8 @@ interface PlaylistCarouselProps {
   playlists: Playlist[];
   coverImage: string;
   isActiveCategory?: boolean;
+  onPlay?: (spotifyId: string) => void;
+  activePlaylistId?: string | null;
 }
 
 export default function PlaylistCarousel({
@@ -23,6 +25,8 @@ export default function PlaylistCarousel({
   playlists,
   coverImage,
   isActiveCategory = false,
+  onPlay,
+  activePlaylistId,
 }: PlaylistCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -192,6 +196,8 @@ export default function PlaylistCarousel({
               name={pl.name}
               description={pl.description}
               isActive={pl.isActive}
+              onPlay={() => onPlay?.(pl.spotifyId)}
+              isPlaying={activePlaylistId === pl.spotifyId}
             />
           </div>
         ))}

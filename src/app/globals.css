@@ -21,12 +21,12 @@
 
 /* ─── Light (default) ─── */
 :root, [data-theme="light"] {
-  --bg: #F9F7F3;
-  --surface: #ffffff;
-  --surface-elevated: #ffffff;
-  --surface-hover: #F2EFE9;
-  --border: rgba(44, 38, 32, 0.08); /* Warmer border for light mode */
-  --border-light: rgba(44, 38, 32, 0.04);
+  --bg: #F4EBE1;
+  --surface: #FCF6EE;
+  --surface-elevated: #FDF8F2;
+  --surface-hover: #EFE4D6;
+  --border: rgba(69, 56, 45, 0.07); /* Warmer border for light mode */
+  --border-light: rgba(69, 56, 45, 0.03);
 
   --accent: #259092;
   --accent-deep: #155455;

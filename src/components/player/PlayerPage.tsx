@@ -5,6 +5,7 @@ import Logo from "./Logo";
 import TimeIndicator from "./TimeIndicator";
 import PlaylistCarousel from "./PlaylistCarousel";
 import ThemeToggle from "./ThemeToggle";
+import GlobalPlayer from "./GlobalPlayer";
 import { Playlist, Schedule } from "@prisma/client";
 
 type PlaylistWithSchedule = Playlist & { schedules?: Schedule[] };
@@ -61,6 +62,32 @@ export default function PlayerPage({
     if (pls.some((p) => p.isActive)) { activeCategory = cat; break; }
   }
 
+  const UNLOCKED_IDS = [
+    "37i9dQZF1DWT3gM3xdPT0c", // Morning Acoustic
+    "37i9dQZF1DWUa8ZRTfalHk", // Pop Rising
+    "37i9dQZF1DWTwnEm1IYyoj", // Soft Pop Hits
+    "37i9dQZF1DXbcP8BbYEQaO", // Night Pop
+  ];
+
+  Object.values(groupedPlaylists).forEach((pls) => {
+    pls.sort((a, b) => {
+      const aUnlocked = UNLOCKED_IDS.includes(a.spotifyId) ? 1 : 0;
+      const bUnlocked = UNLOCKED_IDS.includes(b.spotifyId) ? 1 : 0;
+      return bUnlocked - aUnlocked; // Prioritize unlocked
+    });
+  });
+
+  const [activePlaylistId, setActivePlaylistId] = useState<string | null>(null);
+  const [paywallOpen, setPaywallOpen] = useState(false);
+
+  const handlePlayRequest = (id: string) => {
+    if (UNLOCKED_IDS.includes(id)) {
+      setActivePlaylistId(id);
+    } else {
+      setPaywallOpen(true);
+    }
+  };
+
   const categories = Object.keys(groupedPlaylists).sort((a, b) => {
     if (a === activeCategory) return -1;
     if (b === activeCategory) return 1;
@@ -68,7 +95,7 @@ export default function PlayerPage({
   });
 
   return (
-    <div className="min-h-screen pb-20 font-body relative">
+    <div className={`min-h-screen font-body relative transition-[padding] duration-500 flex flex-col ${activePlaylistId ? "pb-[180px]" : "pb-20"}`}>
       {/* ── Header ── */}
       <header className={`sticky top-0 z-50 bg-accent text-white backdrop-blur-sm shadow-sm px-6 sm:px-10 lg:px-16 py-4 transition-opacity duration-500 ${mounted ? "opacity-100" : "opacity-0"}`}>
         <div className="max-w-screen-2xl mx-auto flex justify-between items-center">
@@ -123,6 +150,8 @@ export default function PlayerPage({
               playlists={groupedPlaylists[category]}
               coverImage={CATEGORY_COVERS[category] || "/covers/morning-chill.png"}
               isActiveCategory={category === activeCategory}
+              onPlay={handlePlayRequest}
+              activePlaylistId={activePlaylistId}
             />
           ))
         ) : (
@@ -143,6 +172,40 @@ export default function PlayerPage({
           </p>
         </div>
       </footer>
+
+      {/* ── Global Player ── */}
+      <GlobalPlayer
+        spotifyId={activePlaylistId}
+        playlistName={playlists.find((p) => p.spotifyId === activePlaylistId)?.name || "Unknown Playlist"}
+        coverImage={
+          playlists.find((p) => p.spotifyId === activePlaylistId)
+            ? CATEGORY_COVERS[playlists.find((p) => p.spotifyId === activePlaylistId)!.category] ||
+              "/covers/morning-chill.png"
+            : ""
+        }
+        onClose={() => setActivePlaylistId(null)}
+      />
+
+      {/* ── Paywall Modal ── */}
+      {paywallOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm transition-opacity duration-300">
+          <div className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-[2rem] max-w-sm w-full p-8 text-center shadow-[0_20px_60px_-15px_rgba(44,38,32,0.15)] dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8)] relative animate-fade-up">
+            <div className="w-14 h-14 rounded-full bg-[var(--surface)] flex items-center border border-[var(--border)] justify-center mx-auto mb-5 text-[var(--text-secondary)]">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            </div>
+            <h3 className="font-display font-medium text-lg text-[var(--text-primary)] mb-2">Premium Access Required</h3>
+            <p className="text-sm text-[var(--text-muted)] mb-8 leading-relaxed">
+              This playlist is not a part of the current contract. Please contact the administrator for more details.
+            </p>
+            <button
+              onClick={() => setPaywallOpen(false)}
+              className="w-full py-3.5 bg-[var(--accent)] hover:bg-[var(--accent-deep)] text-white rounded-xl font-medium transition-colors active:scale-[0.98]"
+            >
+              Understood
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
