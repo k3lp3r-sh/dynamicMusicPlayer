@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // 1. Core Bypass: Always allow API routes, Next.js static builds, and the Login page itself
@@ -44,6 +44,6 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Broad matcher caching everything possible and sending it through the middleware parser
+  // Broad matcher caching everything possible and sending it through the proxy parser
   matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
 };

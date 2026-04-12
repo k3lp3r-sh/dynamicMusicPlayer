@@ -21,7 +21,6 @@ export async function GET(
         Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
         "Accept-Language": "en-US,en;q=0.5",
       },
-      cache: "no-store", // Don't aggressively cache so we can get dynamic updates if possible, though consider revalidate
       next: { revalidate: 3600 }, // Cache the scrape for 1 hour to prevent rate limiting
     });
 

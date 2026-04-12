@@ -98,8 +98,9 @@ export default function GlobalPlayer({
         const data = await res.json();
 
         if (isSubscribed && data.tracks && data.tracks.length > 0) {
-          setRawTracks(data.tracks);
-          const shuffled = shuffleArray(data.tracks);
+          const tracks = data.tracks as Track[];
+          setRawTracks(tracks);
+          const shuffled = shuffleArray(tracks);
           setQueue(shuffled);
           setQueueIndex(0);
         }
@@ -130,8 +131,8 @@ export default function GlobalPlayer({
   }, [spotifyId, queue, queueIndex, rawTracks]);
 
   // 2. Load API Helper
-  const loadSpotifyApi = useCallback(() => {
-    return new Promise((resolve) => {
+  const loadSpotifyApi = useCallback((): Promise<any> => {
+    return new Promise<any>((resolve) => {
       const win = window as any;
       if (win.SpotifyIframeApi) {
         resolve(win.SpotifyIframeApi);
@@ -156,7 +157,7 @@ export default function GlobalPlayer({
     let isSubscribed = true;
 
     const initTrack = async () => {
-      const IFrameAPI = await loadSpotifyApi();
+      const IFrameAPI: any = await loadSpotifyApi();
       if (!isSubscribed) return;
       IFrameApiRef.current = IFrameAPI;
 
